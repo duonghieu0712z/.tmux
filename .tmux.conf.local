@@ -521,4 +521,3 @@ set -g @continuum-boot-options 'iterm'
 # "$@"
 # # /!\ do not remove the previous line
 # #     do not write below this line
-
