@@ -345,11 +345,16 @@ This configuration supports the following builtin variables:
   - `#{battery_vbar}`: 1 character wide, vertical battery charge bar
   - `#{battery_percentage}`: battery percentage
   - `#{battery_status}`: is battery charging or discharging?
-  - `#{circled_session_name}`: circled session number (from ⓪) to ⑳)
+  - `#{circled_window_index}`: circled window number (from ⓪ to ⑳)
+  - `#{circled_session_name}`: circled session number (from ⓪ to ⑳)
   - `#{hostname}`: SSH/Mosh aware hostname information
+  - `#{hostname_full}`: SSH/Mosh aware fully qualified hostname
   - `#{hostname_ssh}`: SSH/Mosh aware hostname information, blank when not
     connected to a remote server through SSH/Mosh
+  - `#{hostname_full_ssh}`: SSH/Mosh aware fully qualified hostname, blank when
+    not connected to a remote server through SSH/Mosh
   - `#{loadavg}`: load average
+  - `#{mouse}`: is mouse mode enabled?
   - `#{pairing}`: is the current session attached to more than one client?
   - `#{pretty_pane_current_path}`: prettified `#{pane_current_path}` when its
     length is too long
