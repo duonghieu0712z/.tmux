@@ -409,9 +409,9 @@ This configuration comes with built-in [TPM] support:
   - ⛔️ Do not add `run '~/.tmux/plugins/tpm/tpm'` to any configuration file
 
 ⚠️ The TPM bindings differ slightly from upstream:
-  - Installing plugins: `<prefix> + I`
-  - Uninstalling plugins: `<prefix> + Alt + u`
-  - Updating plugins: `<prefix> + u`
+  - Installing plugins: `<prefix> I`
+  - Uninstalling plugins: `<prefix> M-u`
+  - Updating plugins: `<prefix> u`
 
 See the sample `.local` customization file for further instructions.
 
