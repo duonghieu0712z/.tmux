@@ -227,8 +227,10 @@ This configuration uses the following bindings:
   - `<prefix> C-c` creates a new session
   - `<prefix> C-f` lets you switch to another session by name
 
-  - `<prefix> C-h` and `<prefix> C-l` let you navigate windows (default
-    `<prefix> n` is unbound and `<prefix> p` is repurposed)
+  - `<prefix> C-h` and `<prefix> C-l` let you navigate windows left/right
+    (default `<prefix> n` is unbound and `<prefix> p` is repurposed)
+  - `<prefix> C-S-H` and `<prefix> C-S-L` let you swap windows left/right
+    (requires `extended-keys` support)
   - `<prefix> Tab` brings you to the last active window
 
   - `<prefix> -` splits the current pane vertically
