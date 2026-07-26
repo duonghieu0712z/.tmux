@@ -21,8 +21,10 @@ Installation
 
 **Requirements:**
 
-  - tmux **`>= 2.6`** running on Linux, macOS, OpenBSD, Windows (WSL or Cygwin)
-  - awk, perl (with Time::HiRes support), grep, and sed
+  - tmux **`>= 2.6`** running on Linux, macOS, FreeBSD, OpenBSD, Windows
+    (WSL or Cygwin)
+  - awk, perl (optionally with Time::HiRes support for sub-second timestamps),
+    grep, and sed
   - Outside of tmux, the `TERM` environment variable must be set to
     `xterm-256color`
 
@@ -70,7 +72,7 @@ file names don't have a leading `.` character.
 you're on your own. Instead, every customization should happen in your
 `.tmux.conf.local` or `tmux.conf.local` customization file copy.**
 
-If you're a Vim user, setting the `VIUAL` or `EDITOR` environment variable to
+If you're a Vim user, setting the `VISUAL` or `EDITOR` environment variable to
 `vim` will enable and further customize the `vi-style` key bindings (see tmux
 manual).
 
@@ -170,7 +172,8 @@ Features
   - SSH/Mosh aware pane splitting (with automatic reconnection to the remote
     server)
   - Copy to OS clipboard (needs `xsel`, `xclip`, or `wl-copy` on Linux)
-  - Support for 4-digit hexadecimal Unicode characters
+  - Support for `\uXXXX` (BMP) and `\UXXXXXXXX` (supplementary plane) Unicode
+    escapes
   - [PathPicker][] integration, if available
   - [Urlscan][] (preferred) or [Urlview][] integration, if available
 
@@ -180,9 +183,9 @@ Features
 [Urlscan]: https://github.com/firecat53/urlscan
 
 The "Maximize any pane to a new window with `<prefix> +`" feature is different
-from the builtin `resize-pane -Z` command, as it allows you to further split a maximized
-pane. It's also more flexible by allowing you to maximize a pane to a new
-window, then change window, then go back and the pane is still in maximized
+from the builtin `resize-pane -Z` command, as it allows you to further split a
+maximized pane. It's also more flexible by allowing you to maximize a pane to a
+new window, then change window, then go back and the pane is still in maximized
 state in its own window. You can then minimize a pane by using `<prefix> +`
 either from the source window or the maximized window.
 
@@ -226,9 +229,12 @@ This configuration uses the following bindings:
 
   - `<prefix> C-c` creates a new session
   - `<prefix> C-f` lets you switch to another session by name
+  - `<prefix> BTab` brings you to the last active session
 
-  - `<prefix> C-h` and `<prefix> C-l` let you navigate windows (default
-    `<prefix> n` is unbound and `<prefix> p` is repurposed)
+  - `<prefix> C-h` and `<prefix> C-l` let you navigate windows left/right
+    (default `<prefix> n` is unbound and `<prefix> p` is repurposed)
+  - `<prefix> C-S-H` and `<prefix> C-S-L` let you swap windows left/right
+    (requires `extended-keys` support)
   - `<prefix> Tab` brings you to the last active window
 
   - `<prefix> -` splits the current pane vertically
@@ -345,11 +351,16 @@ This configuration supports the following builtin variables:
   - `#{battery_vbar}`: 1 character wide, vertical battery charge bar
   - `#{battery_percentage}`: battery percentage
   - `#{battery_status}`: is battery charging or discharging?
-  - `#{circled_session_name}`: circled session number (from ⓪) to ⑳)
+  - `#{circled_window_index}`: circled window number (from ⓪ to ⑳)
+  - `#{circled_session_name}`: circled session number (from ⓪ to ⑳)
   - `#{hostname}`: SSH/Mosh aware hostname information
+  - `#{hostname_full}`: SSH/Mosh aware fully qualified hostname
   - `#{hostname_ssh}`: SSH/Mosh aware hostname information, blank when not
     connected to a remote server through SSH/Mosh
+  - `#{hostname_full_ssh}`: SSH/Mosh aware fully qualified hostname, blank when
+    not connected to a remote server through SSH/Mosh
   - `#{loadavg}`: load average
+  - `#{mouse}`: is mouse mode enabled?
   - `#{pairing}`: is the current session attached to more than one client?
   - `#{pretty_pane_current_path}`: prettified `#{pane_current_path}` when its
     length is too long
@@ -409,9 +420,9 @@ This configuration comes with built-in [TPM] support:
   - ⛔️ Do not add `run '~/.tmux/plugins/tpm/tpm'` to any configuration file
 
 ⚠️ The TPM bindings differ slightly from upstream:
-  - Installing plugins: `<prefix> + I`
-  - Uninstalling plugins: `<prefix> + Alt + u`
-  - Updating plugins: `<prefix> + u`
+  - Installing plugins: `<prefix> I`
+  - Uninstalling plugins: `<prefix> M-u`
+  - Updating plugins: `<prefix> u`
 
 See the sample `.local` customization file for further instructions.
 
