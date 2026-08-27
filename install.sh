@@ -18,9 +18,11 @@ if [ -z "$BASH_VERSION" ]; then
   printf '❌ This installation script requires bash\n' >&2 && exit 1
 fi
 
-if ! tmux -V >/dev/null 2>&1; then
-  printf '❌ tmux is not installed\n' >&2 && exit 1
-fi
+for cmd in tmux git perl sed awk; do
+  if ! command -v "$cmd" > /dev/null 2>&1; then
+    printf '❌ %s is not installed\n' "$cmd" >&2 && exit 1
+  fi
+done
 
 is_true() {
   case "$1" in
@@ -41,16 +43,50 @@ install() {
   printf '🎢 Installing Oh my tmux! Buckle up!\n' >&2
   printf '\n' >&2
   now="$(date +'%Y%m%d%H%M%S').$$"
-  tilde='~'
+  tilde=${HOME:+'~'}
 
+  if [ -n "$XDG_CONFIG_HOME" ]; then
+    TMUX_CONF="$XDG_CONFIG_HOME/tmux/tmux.conf"
+  elif [ -d "$HOME/.config" ]; then
+    TMUX_CONF="$HOME/.config/tmux/tmux.conf"
+  else
+    TMUX_CONF="$HOME/.tmux.conf"
+  fi
+  TMUX_CONF_LOCAL="$TMUX_CONF.local"
+  TMUX_CONF_DIR=$(dirname "$TMUX_CONF")
+
+  OH_MY_TMUX_CLONE_PATH="${XDG_DATA_HOME:-$HOME/.local/share}/tmux/oh-my-tmux"
+
+  printf '✅ Using %s\n' "${OH_MY_TMUX_CLONE_PATH/#"$HOME"/$tilde}" >&2
+  printf '✅ Using %s\n' "${TMUX_CONF/#"$HOME"/$tilde}" >&2
+  printf '✅ Using %s\n' "${TMUX_CONF_LOCAL/#"$HOME"/$tilde}" >&2
+
+  printf '\n' >&2
+  OH_MY_TMUX_REPOSITORY=${OH_MY_TMUX_REPOSITORY:-https://github.com/gpakosz/.tmux.git}
+  printf '⬇️ Cloning Oh my tmux! repository...\n' >&2
+  if ! is_true "$DRY_RUN"; then
+    mkdir -p "$(dirname "$OH_MY_TMUX_CLONE_PATH")"
+    rm -rf "$OH_MY_TMUX_CLONE_PATH.new"
+    trap 'rm -rf "$OH_MY_TMUX_CLONE_PATH.new"' EXIT
+    if ! git clone -q --single-branch "$OH_MY_TMUX_REPOSITORY" "$OH_MY_TMUX_CLONE_PATH.new"; then
+      printf '❌ Failed to clone Oh my tmux! repository\n' >&2 && exit 1
+    fi
+  fi
+
+  printf '\n' >&2
+  printf '🔎 Inspecting filesystem...\n' >&2
   for dir in "${XDG_CONFIG_HOME:-$HOME/.config}/tmux" "$HOME/.tmux"; do
-    if [ -d "$dir" ]; then
+    if [ -d "$dir" ] || [ -L "$dir" ]; then
       if ! is_true "$DRY_RUN" && ! mv "$dir" "$dir.$now"; then
         printf '❌ %s directory exists, failed to back up → %s\n' "${dir/#"$HOME"/$tilde}" "${dir/#"$HOME"/$tilde}.$now" >&2 && exit 1
       fi
       printf '⚠️ %s directory exists, made a backup → %s\n' "${dir/#"$HOME"/$tilde}" "${dir/#"$HOME"/$tilde}.$now" >&2
     fi
   done
+
+  if ! is_true "$DRY_RUN" && ! mkdir -p "$TMUX_CONF_DIR"; then
+    printf '❌ Failed to create %s\n' "${TMUX_CONF_DIR/#"$HOME"/$tilde}" >&2 && exit 1
+  fi
 
   for conf in "$HOME/.tmux.conf" \
               "$HOME/.tmux.conf.local" \
@@ -66,24 +102,19 @@ install() {
         printf '❌ %s file exists, failed to back up → %s\n' "${conf/#"$HOME"/$tilde}" "${conf/#"$HOME"/$tilde}.$now" >&2 && exit 1
       fi
       printf '⚠️ %s file exists, made a backup → %s\n' "${conf/#"$HOME"/$tilde}" "${conf/#"$HOME"/$tilde}.$now" >&2
+    if [ -L "$conf" ]; then
+      printf '⚠️ %s symlink exists, removing → 🗑️\n' "${conf/#"$HOME"/$tilde}" >&2
+      if ! is_true "$DRY_RUN"; then
+        rm -f "$conf"
+      fi
+    elif [ -f "$conf" ]; then
+      if ! is_true "$DRY_RUN" && ! mv "$conf" "$conf.$now"; then
+        printf '❌ %s file exists, failed to back up → %s\n' "${conf/#"$HOME"/$tilde}" "${conf/#"$HOME"/$tilde}.$now" >&2 && exit 1
+      fi
+      printf '⚠️ %s file exists, made a backup → %s\n' "${conf/#"$HOME"/$tilde}" "${conf/#"$HOME"/$tilde}.$now" >&2
     fi
   done
 
-  if [ -n "$XDG_CONFIG_HOME" ]; then
-    TMUX_CONF="$XDG_CONFIG_HOME/tmux/tmux.conf"
-  elif [ -d "$HOME/.config" ]; then
-    TMUX_CONF="$HOME/.config/tmux/tmux.conf"
-  else
-    TMUX_CONF="$HOME/.tmux.conf"
-  fi
-  TMUX_CONF_LOCAL="$TMUX_CONF.local"
-
-  TMUX_CONF_DIR=$(dirname "$TMUX_CONF")
-  if ! is_true "$DRY_RUN" && ! mkdir -p "$TMUX_CONF_DIR"; then
-    printf '❌ Failed to create %s\n' "${TMUX_CONF_DIR/#"$HOME"/$tilde}" >&2 && exit 1
-  fi
-
-  OH_MY_TMUX_CLONE_PATH="${XDG_DATA_HOME:-$HOME/.local/share}/tmux/oh-my-tmux"
   if [ -d "$OH_MY_TMUX_CLONE_PATH" ]; then
     if ! is_true "$DRY_RUN" && ! mv "$OH_MY_TMUX_CLONE_PATH" "$OH_MY_TMUX_CLONE_PATH.$now"; then
       printf '❌ %s exists, failed to back up → %s\n' "${OH_MY_TMUX_CLONE_PATH/#"$HOME"/$tilde}" "${OH_MY_TMUX_CLONE_PATH/#"$HOME"/$tilde}.$now" >&2 && exit 1
@@ -91,20 +122,10 @@ install() {
     printf '⚠️ %s exists, made a backup → %s\n' "${OH_MY_TMUX_CLONE_PATH/#"$HOME"/$tilde}" "${OH_MY_TMUX_CLONE_PATH/#"$HOME"/$tilde}.$now" >&2
   fi
 
-  printf '\n' >&2
-  printf '✅ Using %s\n' "${OH_MY_TMUX_CLONE_PATH/#"$HOME"/$tilde}" >&2
-  printf '✅ Using %s\n' "${TMUX_CONF/#"$HOME"/$tilde}" >&2
-  printf '✅ Using %s\n' "${TMUX_CONF_LOCAL/#"$HOME"/$tilde}" >&2
-
-  printf '\n' >&2
-  OH_MY_TMUX_REPOSITORY=${OH_MY_TMUX_REPOSITORY:-https://github.com/gpakosz/.tmux.git}
-  printf '⬇️ Cloning Oh my tmux! repository...\n' >&2
-  if ! is_true "$DRY_RUN"; then
-    mkdir -p "$(dirname "$OH_MY_TMUX_CLONE_PATH")"
-    if ! git clone -q --single-branch "$OH_MY_TMUX_REPOSITORY" "$OH_MY_TMUX_CLONE_PATH"; then
-      printf '❌ Failed to clone Oh my tmux! repository\n' >&2 && exit 1
-    fi
+  if ! is_true "$DRY_RUN" && ! mv "$OH_MY_TMUX_CLONE_PATH.new" "$OH_MY_TMUX_CLONE_PATH"; then
+    printf '❌ Failed to move %s → %s\n' "${OH_MY_TMUX_CLONE_PATH/#"$HOME"/$tilde}.new" "${OH_MY_TMUX_CLONE_PATH/#"$HOME"/$tilde}" >&2 && exit 1
   fi
+  trap - EXIT
 
   printf '\n' >&2
   if ! is_true "$DRY_RUN" && ! ln -snf "$OH_MY_TMUX_CLONE_PATH/.tmux.conf" "$TMUX_CONF"; then
@@ -116,9 +137,11 @@ install() {
   fi
   printf '✅ Copied %s → %s\n' "${OH_MY_TMUX_CLONE_PATH/#"$HOME"/$tilde}/.tmux.conf.local" "${TMUX_CONF_LOCAL/#"$HOME"/$tilde}" >&2
 
-  tmux() {
-    ${TMUX_PROGRAM:-tmux} ${TMUX_SOCKET:+-S "$TMUX_SOCKET"} "$@"
-  }
+  if [ "${TMUX_PROGRAM:-tmux}" = "tmux" ]; then
+    tmux() { command tmux ${TMUX_SOCKET:+-S "$TMUX_SOCKET"} "$@"; }
+  else
+    tmux() { "$TMUX_PROGRAM" ${TMUX_SOCKET:+-S "$TMUX_SOCKET"} "$@"; }
+  fi
   if ! is_true "$DRY_RUN" && [ -n "$TMUX" ]; then
     tmux set-environment -g TMUX_CONF "$TMUX_CONF"
     tmux set-environment -g TMUX_CONF_LOCAL "$TMUX_CONF_LOCAL"
@@ -127,6 +150,13 @@ install() {
 
   if [ -n "$TMUX" ]; then
     printf '\n' >&2
+    printf '⚠️ Installed Oh my tmux! while tmux was running...\n' >&2
+    printf '   → Existing sessions have outdated environment variables\n' >&2
+    printf '     • TMUX_CONF\n' >&2
+    printf '     • TMUX_CONF_LOCAL\n' >&2
+    printf '     • TMUX_PROGRAM\n' >&2
+    printf '     • TMUX_SOCKET\n' >&2
+    printf '   → Some other things may not work 🤷\n' >&2
     printf '⚠️ Installed Oh my tmux! while tmux was running...\n' >&2
     printf '   → Existing sessions have outdated environment variables\n' >&2
     printf '     • TMUX_CONF\n' >&2
@@ -150,8 +180,16 @@ if [ -p /dev/stdin ]; then
   else
     printf "   🙏 Please take the time to review what's going to be executed...\n" >&2
   fi
+  if ! : 2>/dev/null < /dev/tty; then
+    printf '   ⛔️ No terminal available to review the script...\n' >&2
+    printf '      → Download install.sh and run it directly instead of piping to bash\n' >&2
+    exit 1
+  else
+    printf "   🙏 Please take the time to review what's going to be executed...\n" >&2
+  fi
 
   (
+    printf '\n' >&2
     printf '\n' >&2
 
     self() {
@@ -168,6 +206,9 @@ if [ -p /dev/stdin ]; then
       if ! read -r answer; then
         printf '\n⛔️ Installation aborted...\n' >&2 && exit 1
       fi
+      if ! read -r answer; then
+        printf '\n⛔️ Installation aborted...\n' >&2 && exit 1
+      fi
       case $(printf '%s\n' "$answer" | tr '[:upper:]' '[:lower:]') in
         y|yes)
           if command -v bat >/dev/null 2>&1; then
@@ -175,7 +216,7 @@ if [ -p /dev/stdin ]; then
           else
             case "${VISUAL:-${EDITOR}}" in
               *vim*) # vim, nvim, neovim ... compatible
-                self | ${VISUAL:-${EDITOR}} -c ':set syntax=tmux' -R -
+                self | ${VISUAL:-${EDITOR}} -c ':set syntax=bash' -R -
                 ;;
               *)
                 tput smcup 2>/dev/null
@@ -192,11 +233,13 @@ if [ -p /dev/stdin ]; then
           ;;
         c|cancel)
           printf '\n' >&2
+          printf '\n' >&2
           printf '⛔️ Installation aborted...\n' >&2 && exit 1
           ;;
       esac
     done
   ) < /dev/tty || exit 1
+  printf '\n' >&2
   printf '\n' >&2
 fi
 

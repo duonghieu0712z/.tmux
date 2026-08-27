@@ -22,7 +22,7 @@ Installation
 **Requirements:**
 
   - tmux **`>= 2.6`** running on Linux, macOS, FreeBSD, OpenBSD, Windows
-    (WSL or Cygwin)
+    (WSL or Cygwin — not recommended)
   - awk, perl (optionally with Time::HiRes support for sub-second timestamps),
     grep, and sed
   - Outside of tmux, the `TERM` environment variable must be set to
@@ -37,7 +37,7 @@ You can install Oh my tmux! at any of the following locations:
 
 **Automatic installation**
 
-Copy the following command and paste it in your terminal.
+Copy the following command and paste it into your terminal.
 ```
 curl -fsSL "https://github.com/gpakosz/.tmux/raw/refs/heads/master/install.sh#$(date +%s)" | bash
 ```
@@ -58,15 +58,15 @@ $ ln -s /path/to/oh-my-tmux/.tmux.conf "$XDG_CONFIG_HOME/tmux/tmux.conf"
 $ cp /path/to/oh-my-tmux/.tmux.conf.local "$XDG_CONFIG_HOME/tmux/tmux.conf.local"
 ```
 
-**Manual installation `~/.config/tmux`**
+**Manual installation in `~/.config/tmux`**
 ```
 $ git clone --single-branch https://github.com/gpakosz/.tmux.git "/path/to/oh-my-tmux"
 $ mkdir -p ~/.config/tmux
 $ ln -s /path/to/oh-my-tmux/.tmux.conf ~/.config/tmux/tmux.conf
 $ cp /path/to/oh-my-tmux/.tmux.conf.local ~/.config/tmux/tmux.conf.local
 ```
-⚠️ When installing `$XDG_CONFIG_HOME/tmux` or `~/.config/tmux`, the configuration
-file names don't have a leading `.` character.
+⚠️ When installing in `$XDG_CONFIG_HOME/tmux` or `~/.config/tmux`, the
+configuration file names don't have a leading `.` character.
 
 🚨 **You should never alter the main `.tmux.conf` or `tmux.conf` file. If you do,
 you're on your own. Instead, every customization should happen in your
@@ -76,7 +76,7 @@ If you're a Vim user, setting the `VISUAL` or `EDITOR` environment variable to
 `vim` will enable and further customize the `vi-style` key bindings (see tmux
 manual).
 
-If you're new to tmux, I recommend you to read the [tmux getting started
+If you're new to tmux, I recommend reading the [tmux getting started
 guide][getting-started], as well as the [tmux 3: Productive Mouse-Free
 Development][bhtmux3] book by [@bphogan].
 
@@ -92,7 +92,7 @@ Troubleshooting
 
   - **I believe something's not quite right**
 
-    Please, try make sure no tmux client or server process is currently running.
+    Please make sure no tmux client or server process is currently running.
 
     Then launch tmux with:
     ```
@@ -108,7 +108,7 @@ Troubleshooting
     Otherwise, please open an issue describing what doesn't work and I'll do my
     best to address it.
 
-  - **I tried to used `set`, `bind` and `unbind` in my `.local` customization
+  - **I tried to use `set`, `bind` and `unbind` in my `.local` customization
     file, but Oh my tmux! overwrites my preferences**
 
     When that happens append `#!important` to the line:
@@ -125,18 +125,17 @@ Troubleshooting
 
     This could happen on Linux when the distribution provides a version of glib
     that received Unicode 9.0 upgrades (glib `>= 2.50.1`) while providing a
-    version of glibc that didn't (glibc `< 2.26`). You may also configure
-    `LC_CTYPE` to use an `UTF-8` locale. Typically VTE based terminal emulators
-    rely on glib's `g_unichar_iswide()` function while tmux relies on glibc's
-    `wcwidth()` function. When these two functions disagree, display gets messed
-    up.
+    version of glibc that didn't (glibc `< 2.26`). Typically VTE-based terminal
+    emulators rely on glib's `g_unichar_iswide()` function while tmux relies on
+    glibc's `wcwidth()` function. When these two functions disagree, display
+    gets messed up. You may also configure `LC_CTYPE` to use a `UTF-8` locale.
 
     This can also happen on macOS when using iTerm2 and "Use Unicode version 9
-    character widths" is enabled in `Preferences... > Profiles > Text`
+    character widths" is enabled in `Preferences... > Profiles > Text`.
 
     For that reason, the sample `.local` customization file stopped using
-    Unicode characters for which width changed in between Unicode 8.0 and 9.0
-    standards, as well as Emojis.
+    Unicode characters for which width changed between Unicode 8.0 and 9.0
+    standards, as well as emojis.
 
   - **I installed Powerline and/or (patched) fonts but I can't see the Powerline
     symbols**
@@ -197,8 +196,8 @@ either from the source window or the maximized window.
   </picture>
 </p>
 
-Mouse mode allows you to set the active window, set the active pane, resize
-panes and automatically switches to copy-mode to select text.
+Mouse mode allows you to set the active window, set the active pane, and resize
+panes. It also switches automatically to copy-mode when you select text.
 
 <p align="center">
   <picture>
@@ -240,7 +239,7 @@ This configuration uses the following bindings:
   - `<prefix> -` splits the current pane vertically
   - `<prefix> _` splits the current pane horizontally
   - `<prefix> h`, `<prefix> j`, `<prefix> k` and `<prefix> l` let you navigate
-    panes ala Vim
+    panes à la Vim
   - `<prefix> H`, `<prefix> J`, `<prefix> K`, `<prefix> L` let you resize panes
   - `<prefix> <` and `<prefix> >` let you swap panes
   - `<prefix> +` maximizes the current pane to a new window
@@ -255,7 +254,7 @@ This configuration uses the following bindings:
   - `<prefix> p` pastes from the top paste-buffer
   - `<prefix> P` lets you choose the paste-buffer to paste from
 
-Additionally, `copy-mode-vi` matches [my own Vim configuration]
+Additionally, `copy-mode-vi` matches [my own Vim configuration].
 
 [my own Vim configuration]: https://github.com/gpakosz/.vim.git
 
@@ -263,8 +262,8 @@ Bindings for `copy-mode-vi`:
 
   - `v` begins selection / visual mode
   - `C-v` toggles between blockwise visual mode and visual mode
-  - `H` jumps to the start of line
-  - `L` jumps to the end of line
+  - `H` jumps to the start of the line
+  - `L` jumps to the end of the line
   - `y` copies the selection to the top paste-buffer
   - `Escape` cancels the current operation
 
@@ -302,14 +301,14 @@ look is based on the use of special symbols:
 
 To make use of these symbols, there are several options:
 
-  - Use a font that already bundles those: this is the case of the [Source Code
+  - Use a font that already bundles those: this is the case for the [Source Code
     Pro][source code pro] font
   - Use a [pre-patched font][powerline patched fonts]
   - Use your preferred font along with the standalone [Powerline font][powerline
     font] (that only contains the Powerline symbols): [this highly depends on
     your operating system and your terminal emulator][terminal support], for
     instance here's a screenshot of iTerm2 configured to use
-    `PowerlineSymbols.otf` for non ASCII symbols:
+    `PowerlineSymbols.otf` for non-ASCII symbols:
     <p align="center">
       <picture>
         <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/553208/62243890-8232f500-b3de-11e9-9b8c-51a5d38bdaa8.png">
@@ -364,7 +363,7 @@ This configuration supports the following builtin variables:
   - `#{pairing}`: is the current session attached to more than one client?
   - `#{pretty_pane_current_path}`: prettified `#{pane_current_path}` when its
     length is too long
-  - `#{prefix}`: is prefix being depressed?
+  - `#{prefix}`: is prefix being pressed?
   - `#{root}`: is the current user root?
   - `#{synchronized}`: are the panes synchronized?
   - `#{uptime_y}`: uptime years
@@ -373,10 +372,10 @@ This configuration supports the following builtin variables:
   - `#{uptime_m}`: uptime minutes
   - `#{uptime_s}`: uptime seconds
   - `#{username}`: SSH/Mosh aware username information
-  - `#{username_ssh}`: SSH aware username information, blank when not connected
-    to a remote server through SSH/Mosh
+  - `#{username_ssh}`: SSH/Mosh aware username information, blank when not
+    connected to a remote server through SSH/Mosh
 
-Beside the variables mentioned above, the `tmux_conf_theme_status_left` and
+Besides the variables mentioned above, the `tmux_conf_theme_status_left` and
 `tmux_conf_theme_status_right` variables support the usual tmux syntax, e.g.
 using `#()` to call an external command that inserts weather information
 provided by [wttr.in]:
@@ -384,7 +383,7 @@ provided by [wttr.in]:
 tmux_conf_theme_status_right='#{prefix}#{pairing}#{synchronized} #(curl -m 1 wttr.in?format=3 2>/dev/null; sleep 900) , %R , %d %b | #{username}#{root} | #{hostname} '
 ```
 The `sleep 900` call makes sure the network request is issued at most every 15
-minutes whatever the value of `status-interval`.
+minutes regardless of the value of `status-interval`.
 
 <p align="center">
   <picture>
@@ -439,11 +438,11 @@ See the sample `.local` customization file for further instructions.
 </p>
 
 ⚠️ I don't recommend running this configuration with [Cygwin] anymore. Forking
-under Cygwin is extremely slow and this configuration issues a fair amount
+under Cygwin is extremely slow and this configuration issues a fair amount of
 `run-shell` commands under the hood. As such, you will experience high CPU
 usage.
 
-Instead I recommend [Windows Subsystem for Linux][WSL] along with [Windows
+Instead, I recommend [Windows Subsystem for Linux][WSL] along with [Windows
 Terminal]. As an alternative, you may also consider using [Mintty as a terminal
 for WSL][wsltty].
 
